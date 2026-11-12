@@ -2,11 +2,11 @@
 <RevitAddIns>
   <AddIn Type="Command">
     <Name>Editor de Parâmetros</Name>
-    <Assembly>"C:\Caminho\Para\Sua\DLL\RevitParameterEditor.dll"</Assembly>
-    <AddInId>PASTE-A-NEW-GUID-HERE</AddInId>
+    <Assembly>RevitParameterEditor\RevitParameterEditor.dll</Assembly>
+    <AddInId>27B3E091-954F-419C-9EC5-B14611374E5D</AddInId>
     <FullClassName>RevitParameterEditor.Command</FullClassName>
-    <VendorId>SeuNome</VendorId>
-    <VendorDescription>Seu Website ou Descrição</VendorDescription>
+    <VendorId>twstevenc</VendorId>
+    <VendorDescription>Fork of gabas01/Revit-Excel-Parameter-Editor</VendorDescription>
     <Text>Editor de Parâmetros Revit-Excel</Text>
     <Description>Exporta uma tabela para Excel, permite modificações e reimporta para atualizar os parâmetros no Revit.</Description>
   </AddIn>

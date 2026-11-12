@@ -1,0 +1,57 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Revit 2025/2026 使用 .NET 8 -->
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <PlatformTarget>x64</PlatformTarget>
+    <RootNamespace>RevitParameterEditor</RootNamespace>
+    <AssemblyName>RevitParameterEditor</AssemblyName>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <!-- 讓 NuGet 相依的 dll（EPPlus 等）一起輸出到 bin 資料夾 -->
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+
+    <!-- 換 Revit 版本或安裝路徑時只要改這兩行 -->
+    <RevitVersion>2026</RevitVersion>
+    <RevitDir>C:\Program Files\Autodesk\Revit $(RevitVersion)</RevitDir>
+    <AddinDir>$(AppData)\Autodesk\Revit\Addins\$(RevitVersion)</AddinDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Private=false：不要把 Revit 自己的 dll 複製到輸出資料夾 -->
+    <Reference Include="RevitAPI">
+      <HintPath>$(RevitDir)\RevitAPI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="RevitAPIUI">
+      <HintPath>$(RevitDir)\RevitAPIUI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- 4.5.3.3 是 EPPlus 最後一個 LGPL 版本，商業使用免付費 -->
+    <PackageReference Include="EPPlus" Version="4.5.3.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="RevitParameterEditor.addin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <!-- 編譯成功後自動部署到 Revit 的 Addins 資料夾 -->
+  <Target Name="DeployToRevit" AfterTargets="Build">
+    <ItemGroup>
+      <DeployFiles Include="$(OutDir)**\*.*" Exclude="$(OutDir)*.addin" />
+    </ItemGroup>
+    <Copy SourceFiles="@(DeployFiles)"
+          DestinationFiles="@(DeployFiles->'$(AddinDir)\RevitParameterEditor\%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(ProjectDir)RevitParameterEditor.addin"
+          DestinationFolder="$(AddinDir)" SkipUnchangedFiles="true" />
+  </Target>
+
+</Project>

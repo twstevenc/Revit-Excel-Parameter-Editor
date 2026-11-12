@@ -21,8 +21,9 @@ namespace RevitParameterEditor
             _uiapp = uiapp;
             _doc = uiapp.ActiveUIDocument.Document;
 
-            // Define o contexto da licença para o EPPlus
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial; // Mude para Commercial se aplicável
+            // EPPlus 4.5.3.3 (LGPL) 不需要設定 LicenseContext；
+            // .NET 8 需註冊 code page 編碼，否則 EPPlus 可能找不到 1252 編碼
+            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
 
             LoadSchedules();
         }
@@ -42,7 +43,7 @@ namespace RevitParameterEditor
         }
 
         // Lógica do botão de EXPORTAR
-        private async void ExportButton_Click(object sender, RoutedEventArgs e)
+        private void ExportButton_Click(object sender, RoutedEventArgs e)
         {
             if (ScheduleComboBox.SelectedItem == null)
             {
@@ -65,7 +66,7 @@ namespace RevitParameterEditor
                 StatusTextBlock.Text = "Exportando dados...";
                 try
                 {
-                    await ExportScheduleAsync(schedule, saveFileDialog.FileName);
+                    ExportSchedule(schedule, saveFileDialog.FileName);
                     StatusTextBlock.Text = "Exportação concluída com sucesso!";
                     TaskDialog.Show("Sucesso", $"A tabela '{schedule.Name}' foi exportada.");
                 }
@@ -103,43 +104,60 @@ namespace RevitParameterEditor
             }
         }
 
-        // Método assíncrono para exportar
-        private System.Threading.Tasks.Task ExportScheduleAsync(ViewSchedule schedule, string filePath)
+        // 找參數：先找實例參數，找不到再找類型參數（僅供匯出顯示）
+        private Parameter FindParameter(Element elem, string name)
         {
-            return System.Threading.Tasks.Task.Run(() =>
+            var p = elem.LookupParameter(name);
+            if (p != null) return p;
+
+            var typeId = elem.GetTypeId();
+            if (typeId == null || typeId == ElementId.InvalidElementId) return null;
+            return _doc.GetElement(typeId)?.LookupParameter(name);
+        }
+
+        private static string GetValueText(Parameter p)
+        {
+            if (p == null) return null;
+            return p.AsValueString() ?? p.AsString();
+        }
+
+        // 匯出（Revit API 只能在主執行緒呼叫，所以不使用 Task.Run）
+        private void ExportSchedule(ViewSchedule schedule, string filePath)
+        {
+            using (var package = new ExcelPackage())
             {
-                using (var package = new ExcelPackage())
+                var worksheet = package.Workbook.Worksheets.Add("Dados da Tabela");
+                var collector = new FilteredElementCollector(_doc, schedule.Id);
+
+                // 表頭：A 欄是 ElementID，其後是明細表實際包含的欄位
+                var definition = schedule.Definition;
+                var fieldNames = new List<string>();
+                for (int i = 0; i < definition.GetFieldCount(); i++)
                 {
-                    var worksheet = package.Workbook.Worksheets.Add("Dados da Tabela");
-                    var collector = new FilteredElementCollector(_doc, schedule.Id);
-
-                    // Cabeçalhos
-                    var fields = schedule.Definition.GetSchedulableFields();
-                    var headers = new List<string> { "ElementID" }; // Coluna A será o ID
-                    headers.AddRange(schedule.Definition.GetSchedulableFields().Select(f => f.GetName(_doc)));
-                    
-                    for (int i = 0; i < headers.Count; i++)
-                    {
-                        worksheet.Cells[1, i + 1].Value = headers[i];
-                    }
-
-                    // Dados
-                    int row = 2;
-                    foreach (Element elem in collector)
-                    {
-                        worksheet.Cells[row, 1].Value = elem.Id.ToString(); // Adiciona o ID do elemento
-                        for (int col = 0; col < schedule.Definition.GetFieldCount(); col++)
-                        {
-                            var field = schedule.Definition.GetField(col);
-                            worksheet.Cells[row, col + 2].Value = elem.get_Parameter(field.ParameterId)?.AsValueString() ?? elem.get_Parameter(field.ParameterId)?.AsString();
-                        }
-                        row++;
-                    }
-
-                    worksheet.Cells.AutoFitColumns();
-                    package.SaveAs(new FileInfo(filePath));
+                    fieldNames.Add(definition.GetField(i).GetName());
                 }
-            });
+
+                worksheet.Cells[1, 1].Value = "ElementID";
+                for (int i = 0; i < fieldNames.Count; i++)
+                {
+                    worksheet.Cells[1, i + 2].Value = fieldNames[i];
+                }
+
+                // 資料
+                int row = 2;
+                foreach (Element elem in collector)
+                {
+                    worksheet.Cells[row, 1].Value = elem.Id.ToString();
+                    for (int col = 0; col < fieldNames.Count; col++)
+                    {
+                        worksheet.Cells[row, col + 2].Value = GetValueText(FindParameter(elem, fieldNames[col]));
+                    }
+                    row++;
+                }
+
+                worksheet.Cells.AutoFitColumns();
+                package.SaveAs(new FileInfo(filePath));
+            }
         }
 
         // Método para importar
@@ -188,11 +206,21 @@ namespace RevitParameterEditor
                                 {
                                     var newValue = worksheet.Cells[row, col].Text;
                                     // Compara o valor antigo com o novo para evitar transações desnecessárias
-                                    string oldValue = parameter.AsValueString() ?? parameter.AsString();
-                                    if(oldValue != newValue)
+                                    string oldValue = GetValueText(parameter) ?? string.Empty;
+                                    if (oldValue != newValue)
                                     {
-                                        parameter.Set(newValue);
-                                        elementUpdated = true;
+                                        // 文字參數用 Set，數值等其他型別用 SetValueString（會依專案單位解析）
+                                        try
+                                        {
+                                            bool ok = parameter.StorageType == StorageType.String
+                                                ? parameter.Set(newValue)
+                                                : parameter.SetValueString(newValue);
+                                            if (ok) elementUpdated = true;
+                                        }
+                                        catch (Exception)
+                                        {
+                                            // 這個參數無法用文字寫入（例如 ElementId 型別），略過
+                                        }
                                     }
                                 }
                             }
