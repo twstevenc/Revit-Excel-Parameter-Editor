@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RevitAddIns>
-  <AddIn Type="Command">
-    <Name>Editor de Parâmetros</Name>
+  <AddIn Type="Application">
+    <Name>Revit Excel Parameter Editor</Name>
     <Assembly>RevitParameterEditor\RevitParameterEditor.dll</Assembly>
     <AddInId>27B3E091-954F-419C-9EC5-B14611374E5D</AddInId>
-    <FullClassName>RevitParameterEditor.Command</FullClassName>
+    <FullClassName>RevitParameterEditor.App</FullClassName>
     <VendorId>twstevenc</VendorId>
     <VendorDescription>Fork of gabas01/Revit-Excel-Parameter-Editor</VendorDescription>
-    <Text>Editor de Parâmetros Revit-Excel</Text>
-    <Description>Exporta uma tabela para Excel, permite modificações e reimporta para atualizar os parâmetros no Revit.</Description>
   </AddIn>
 </RevitAddIns>

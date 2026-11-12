@@ -1,7 +1,7 @@
-using Autodesk.Revit.DB;
+﻿using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Microsoft.Win32;
-using OfficeOpenXml; // Biblioteca EPPlus
+using OfficeOpenXml; // EPPlus 套件
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -28,7 +28,7 @@ namespace RevitParameterEditor
             LoadSchedules();
         }
 
-        // Carrega todas as tabelas do projeto no ComboBox
+        // 把專案中所有明細表載入下拉選單
         private void LoadSchedules()
         {
             var schedules = new FilteredElementCollector(_doc)
@@ -42,13 +42,13 @@ namespace RevitParameterEditor
             ScheduleComboBox.DisplayMemberPath = "Name";
         }
 
-        // Lógica do botão de EXPORTAR
+        // 「匯出」按鈕
         private void ExportButton_Click(object sender, RoutedEventArgs e)
         {
             if (ScheduleComboBox.SelectedItem == null)
             {
-                StatusTextBlock.Text = "Erro: Nenhuma tabela selecionada.";
-                TaskDialog.Show("Erro", "Por favor, selecione uma tabela da lista.");
+                StatusTextBlock.Text = "錯誤：尚未選擇明細表。";
+                TaskDialog.Show("錯誤", "請先從清單中選擇一張明細表。");
                 return;
             }
 
@@ -56,50 +56,50 @@ namespace RevitParameterEditor
 
             var saveFileDialog = new SaveFileDialog
             {
-                Filter = "Arquivo Excel (*.xlsx)|*.xlsx",
+                Filter = "Excel 檔案 (*.xlsx)|*.xlsx",
                 FileName = $"{schedule.Name}.xlsx",
-                Title = "Salvar Tabela"
+                Title = "儲存明細表"
             };
 
             if (saveFileDialog.ShowDialog() == true)
             {
-                StatusTextBlock.Text = "Exportando dados...";
+                StatusTextBlock.Text = "匯出中...";
                 try
                 {
                     ExportSchedule(schedule, saveFileDialog.FileName);
-                    StatusTextBlock.Text = "Exportação concluída com sucesso!";
-                    TaskDialog.Show("Sucesso", $"A tabela '{schedule.Name}' foi exportada.");
+                    StatusTextBlock.Text = "匯出完成。";
+                    TaskDialog.Show("完成", $"明細表「{schedule.Name}」已匯出。");
                 }
                 catch (Exception ex)
                 {
-                    StatusTextBlock.Text = "Erro na exportação.";
-                    TaskDialog.Show("Erro de Exportação", ex.Message);
+                    StatusTextBlock.Text = "匯出失敗。";
+                    TaskDialog.Show("匯出錯誤", ex.Message);
                 }
             }
         }
 
-        // Lógica do botão de IMPORTAR
+        // 「匯入」按鈕
         private void ImportButton_Click(object sender, RoutedEventArgs e)
         {
             var openFileDialog = new OpenFileDialog
             {
-                Filter = "Arquivo Excel (*.xlsx)|*.xlsx",
-                Title = "Selecionar Arquivo para Importação"
+                Filter = "Excel 檔案 (*.xlsx)|*.xlsx",
+                Title = "選擇要匯入的檔案"
             };
 
             if (openFileDialog.ShowDialog() == true)
             {
-                StatusTextBlock.Text = "Importando e atualizando...";
+                StatusTextBlock.Text = "匯入並更新中...";
                 try
                 {
                     int updatedCount = ImportParameters(openFileDialog.FileName);
-                    StatusTextBlock.Text = $"Importação concluída. {updatedCount} elementos atualizados.";
-                    TaskDialog.Show("Sucesso", $"{updatedCount} elementos foram atualizados no projeto Revit.");
+                    StatusTextBlock.Text = $"匯入完成，已更新 {updatedCount} 個元件。";
+                    TaskDialog.Show("完成", $"已更新 Revit 專案中的 {updatedCount} 個元件。");
                 }
                 catch (Exception ex)
                 {
-                    StatusTextBlock.Text = "Erro na importação.";
-                    TaskDialog.Show("Erro de Importação", $"Ocorreu um erro: {ex.Message}");
+                    StatusTextBlock.Text = "匯入失敗。";
+                    TaskDialog.Show("匯入錯誤", $"發生錯誤：{ex.Message}");
                 }
             }
         }
@@ -126,7 +126,7 @@ namespace RevitParameterEditor
         {
             using (var package = new ExcelPackage())
             {
-                var worksheet = package.Workbook.Worksheets.Add("Dados da Tabela");
+                var worksheet = package.Workbook.Worksheets.Add("明細表資料");
                 var collector = new FilteredElementCollector(_doc, schedule.Id);
 
                 // 表頭：A 欄是 ElementID，其後是明細表實際包含的欄位
@@ -160,7 +160,7 @@ namespace RevitParameterEditor
             }
         }
 
-        // Método para importar
+        // 匯入
         private int ImportParameters(string filePath)
         {
             int updatedCount = 0;
@@ -169,7 +169,7 @@ namespace RevitParameterEditor
             using (var package = new ExcelPackage(fileInfo))
             {
                 var worksheet = package.Workbook.Worksheets.FirstOrDefault();
-                if (worksheet == null) throw new Exception("Nenhuma planilha encontrada no arquivo.");
+                if (worksheet == null) throw new Exception("檔案中找不到任何工作表。");
 
                 var headers = new List<string>();
                 for (int col = 1; col <= worksheet.Dimension.End.Column; col++)
@@ -178,9 +178,9 @@ namespace RevitParameterEditor
                 }
 
                 int elementIdCol = headers.IndexOf("ElementID") + 1;
-                if (elementIdCol == 0) throw new Exception("A coluna 'ElementID' não foi encontrada. Ela é essencial para a importação.");
+                if (elementIdCol == 0) throw new Exception("找不到「ElementID」欄，匯入必須有這一欄。");
 
-                using (var trans = new Transaction(_doc, "Atualizar Parâmetros via Excel"))
+                using (var trans = new Transaction(_doc, "從 Excel 更新參數"))
                 {
                     trans.Start();
 
@@ -197,7 +197,7 @@ namespace RevitParameterEditor
                             bool elementUpdated = false;
                             for (int col = 1; col <= headers.Count; col++)
                             {
-                                if (col == elementIdCol) continue; // Pula a coluna do ID
+                                if (col == elementIdCol) continue; // 略過 ID 欄
 
                                 var paramName = headers[col - 1];
                                 var parameter = element.LookupParameter(paramName);
@@ -205,7 +205,7 @@ namespace RevitParameterEditor
                                 if (parameter != null && !parameter.IsReadOnly)
                                 {
                                     var newValue = worksheet.Cells[row, col].Text;
-                                    // Compara o valor antigo com o novo para evitar transações desnecessárias
+                                    // 新舊值相同就不寫入
                                     string oldValue = GetValueText(parameter) ?? string.Empty;
                                     if (oldValue != newValue)
                                     {

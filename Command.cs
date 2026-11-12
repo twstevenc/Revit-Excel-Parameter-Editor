@@ -1,4 +1,4 @@
-using Autodesk.Revit.Attributes;
+﻿using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 
@@ -11,7 +11,7 @@ namespace RevitParameterEditor
         {
             var uiapp = commandData.Application;
             
-            // Inicia a janela da interface do usuário
+            // 開啟主視窗
             var view = new MainView(uiapp);
             view.ShowDialog();
 

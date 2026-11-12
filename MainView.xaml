@@ -1,7 +1,7 @@
-<Window x:Class="RevitParameterEditor.MainView"
+﻿<Window x:Class="RevitParameterEditor.MainView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Editor de Parâmetros Revit-Excel" Height="300" Width="450"
+        Title="Revit-Excel 參數編輯器" Height="300" Width="450"
         WindowStartupLocation="CenterScreen">
     <Grid Margin="15">
         <Grid.RowDefinitions>
@@ -11,19 +11,19 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0">
-            <Label Content="1. Selecione a Tabela para Exportar:" FontWeight="Bold"/>
+            <Label Content="1. 選擇要匯出的明細表：" FontWeight="Bold"/>
             <ComboBox x:Name="ScheduleComboBox" Margin="0,5,0,15"/>
-            <Button x:Name="ExportButton" Content="Exportar para Excel" Padding="5" Click="ExportButton_Click" Background="#007ACC" Foreground="White" FontWeight="Bold"/>
+            <Button x:Name="ExportButton" Content="匯出到 Excel" Padding="5" Click="ExportButton_Click" Background="#007ACC" Foreground="White" FontWeight="Bold"/>
         </StackPanel>
 
         <StackPanel Grid.Row="1" VerticalAlignment="Center">
-            <Label Content="2. Modifique no Excel e Importe:" FontWeight="Bold"/>
-            <Button x:Name="ImportButton" Content="Importar do Excel e Atualizar" Padding="5" Margin="0,5,0,0" Click="ImportButton_Click"/>
+            <Label Content="2. 在 Excel 修改後匯入：" FontWeight="Bold"/>
+            <Button x:Name="ImportButton" Content="從 Excel 匯入並更新" Padding="5" Margin="0,5,0,0" Click="ImportButton_Click"/>
         </StackPanel>
 
         <StatusBar Grid.Row="2">
             <StatusBarItem>
-                <TextBlock x:Name="StatusTextBlock" Text="Pronto."/>
+                <TextBlock x:Name="StatusTextBlock" Text="就緒。"/>
             </StatusBarItem>
         </StatusBar>
     </Grid>

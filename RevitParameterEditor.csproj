@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <!-- Revit 2025/2026 使用 .NET 8 -->
@@ -34,6 +34,11 @@
   <ItemGroup>
     <!-- 4.5.3.3 是 EPPlus 最後一個 LGPL 版本，商業使用免付費 -->
     <PackageReference Include="EPPlus" Version="4.5.3.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- 按鈕圖示，內嵌到 dll -->
+    <Resource Include="Resources\*.png" />
   </ItemGroup>
 
   <ItemGroup>
