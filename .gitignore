@@ -10,3 +10,9 @@
 
 # Rider
 .idea/
+
+# 參考文件（業主規範 PDF，不放進公開的 repo）
+Reference/
+
+# Excel 暫存檔
+~$*.xlsx

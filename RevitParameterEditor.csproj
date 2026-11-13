@@ -45,6 +45,11 @@
     <None Update="RevitParameterEditor.addin">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <!-- 參數設定檔：Configs 資料夾裡的每個 .xlsx 都會出現在「建立參數」視窗的下拉選單 -->
+    <None Remove="Configs\**\~$*.xlsx" />
+    <None Update="Configs\**\*.xlsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <!-- 編譯成功後自動部署到 Revit 的 Addins 資料夾 -->

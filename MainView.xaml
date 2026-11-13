@@ -1,27 +1,65 @@
-﻿<Window x:Class="RevitParameterEditor.MainView"
+<Window x:Class="RevitParameterEditor.MainView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Revit-Excel 參數編輯器" Height="300" Width="450"
+        Title="Revit-Excel 參數編輯器" Height="470" Width="480" MinHeight="470" MinWidth="420"
         WindowStartupLocation="CenterScreen">
     <Grid Margin="15">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0">
-            <Label Content="1. 選擇要匯出的明細表：" FontWeight="Bold"/>
-            <ComboBox x:Name="ScheduleComboBox" Margin="0,5,0,15"/>
-            <Button x:Name="ExportButton" Content="匯出到 Excel" Padding="5" Click="ExportButton_Click" Background="#007ACC" Foreground="White" FontWeight="Bold"/>
-        </StackPanel>
+        <!-- 依設定檔匯出：欄位照設定檔中的順序排列 -->
+        <GroupBox Grid.Row="0" Padding="8" Margin="0,0,0,10">
+            <GroupBox.Header>
+                <TextBlock Text="匯出 A：依參數設定檔（欄位照設定檔順序）" FontWeight="Bold"/>
+            </GroupBox.Header>
+            <StackPanel>
+                <ComboBox x:Name="ConfigComboBox" DisplayMemberPath="Name" Margin="0,2,0,8"/>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                    <TextBlock Text="範圍：" VerticalAlignment="Center"/>
+                    <RadioButton x:Name="ViewScopeRadio" GroupName="Scope" IsChecked="True"
+                                 VerticalAlignment="Center" Margin="4,0,14,0">
+                        <TextBlock Text="目前視圖中的元件"/>
+                    </RadioButton>
+                    <RadioButton x:Name="ProjectScopeRadio" GroupName="Scope" VerticalAlignment="Center">
+                        <TextBlock Text="整個專案"/>
+                    </RadioButton>
+                </StackPanel>
+                <Button x:Name="ExportByConfigButton" Padding="5" Click="ExportByConfigButton_Click"
+                        Background="#217346" Foreground="White" FontWeight="Bold">
+                    <TextBlock Text="匯出到 Excel"/>
+                </Button>
+            </StackPanel>
+        </GroupBox>
 
-        <StackPanel Grid.Row="1" VerticalAlignment="Center">
-            <Label Content="2. 在 Excel 修改後匯入：" FontWeight="Bold"/>
-            <Button x:Name="ImportButton" Content="從 Excel 匯入並更新" Padding="5" Margin="0,5,0,0" Click="ImportButton_Click"/>
-        </StackPanel>
+        <!-- 依明細表匯出 -->
+        <GroupBox Grid.Row="1" Padding="8" Margin="0,0,0,10">
+            <GroupBox.Header>
+                <TextBlock Text="匯出 B：依明細表" FontWeight="Bold"/>
+            </GroupBox.Header>
+            <StackPanel>
+                <ComboBox x:Name="ScheduleComboBox" Margin="0,2,0,8"/>
+                <Button x:Name="ExportButton" Padding="5" Click="ExportButton_Click">
+                    <TextBlock Text="匯出明細表到 Excel"/>
+                </Button>
+            </StackPanel>
+        </GroupBox>
 
-        <StatusBar Grid.Row="2">
+        <!-- 匯入 -->
+        <GroupBox Grid.Row="2" Padding="8">
+            <GroupBox.Header>
+                <TextBlock Text="匯入：在 Excel 修改後寫回 Revit" FontWeight="Bold"/>
+            </GroupBox.Header>
+            <Button x:Name="ImportButton" Padding="5" Margin="0,2,0,0" Click="ImportButton_Click">
+                <TextBlock Text="從 Excel 匯入並更新"/>
+            </Button>
+        </GroupBox>
+
+        <StatusBar Grid.Row="4">
             <StatusBarItem>
                 <TextBlock x:Name="StatusTextBlock" Text="就緒。"/>
             </StatusBarItem>
