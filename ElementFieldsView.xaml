@@ -1,0 +1,103 @@
+<Window x:Class="RevitParameterEditor.ElementFieldsView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="元件欄位" Height="640" Width="620" MinHeight="520" MinWidth="520"
+        WindowStartupLocation="CenterScreen" ShowInTaskbar="False">
+    <Grid Margin="14">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" x:Name="HeaderText" FontWeight="Bold" FontSize="14" TextWrapping="Wrap"
+                   Margin="0,0,0,10"/>
+
+        <!-- 新增欄位 -->
+        <GroupBox Grid.Row="1" Padding="8" Margin="0,0,0,10">
+            <GroupBox.Header>
+                <TextBlock Text="新增欄位，或修改現有欄位的內容" FontWeight="Bold"/>
+            </GroupBox.Header>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="欄位名稱：" VerticalAlignment="Center"/>
+                <TextBox Grid.Row="0" Grid.Column="1" x:Name="NameBox" Margin="0,2"/>
+
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="內容：" VerticalAlignment="Center"/>
+                <TextBox Grid.Row="1" Grid.Column="1" x:Name="ValueBox" Margin="0,2"/>
+
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="群組：" VerticalAlignment="Center"/>
+                <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Margin="0,2">
+                    <ComboBox x:Name="GroupCombo" Width="120"/>
+                    <RadioButton x:Name="InstanceRadio" GroupName="Kind" IsChecked="True" VerticalAlignment="Center"
+                                 Margin="16,0,10,0">
+                        <TextBlock Text="實例（每個元件各自一個值）"/>
+                    </RadioButton>
+                    <RadioButton x:Name="TypeRadio" GroupName="Kind" VerticalAlignment="Center">
+                        <TextBlock Text="類型"/>
+                    </RadioButton>
+                </StackPanel>
+
+                <TextBlock Grid.Row="3" Grid.Column="1" x:Name="AddNoteText" Foreground="#666666" FontSize="11"
+                           TextWrapping="Wrap" Margin="0,4,0,6"/>
+
+                <Button Grid.Row="4" Grid.Column="1" x:Name="AddButton" Padding="14,4" HorizontalAlignment="Left"
+                        Background="#217346" Foreground="White" FontWeight="Bold" Click="AddButton_Click">
+                    <TextBlock Text="新增或更新"/>
+                </Button>
+            </Grid>
+        </GroupBox>
+
+        <!-- 現有欄位 -->
+        <GroupBox Grid.Row="2" Padding="8">
+            <GroupBox.Header>
+                <TextBlock x:Name="ExistingHeaderText" Text="這個品類現有的自訂欄位" FontWeight="Bold"/>
+            </GroupBox.Header>
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Bottom" Margin="0,8,0,0">
+                    <RadioButton x:Name="RemoveFromCategoryRadio" GroupName="Delete" IsChecked="True" Margin="0,2">
+                        <TextBlock x:Name="RemoveFromCategoryText" Text="只從這個品類移除"/>
+                    </RadioButton>
+                    <RadioButton x:Name="DeleteEverywhereRadio" GroupName="Delete" Margin="0,2">
+                        <TextBlock Text="從整個專案刪除（所有品類都會失去這個欄位）"/>
+                    </RadioButton>
+                    <Button x:Name="DeleteButton" Padding="14,4" Margin="0,6,0,0" HorizontalAlignment="Left"
+                            Background="#C62828" Foreground="White" FontWeight="Bold" Click="DeleteButton_Click">
+                        <TextBlock Text="刪除勾選的欄位"/>
+                    </Button>
+                </StackPanel>
+                <ListBox x:Name="FieldListBox" SelectionChanged="FieldListBox_SelectionChanged"
+                         ScrollViewer.HorizontalScrollBarVisibility="Auto">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" Margin="2,3">
+                                <CheckBox IsChecked="{Binding IsChecked, Mode=TwoWay}" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding Title}" FontWeight="SemiBold" MinWidth="170" Margin="6,0,0,0"/>
+                                <TextBlock Text="{Binding Subtitle}" Foreground="#666666" Margin="8,0,0,0"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
+        </GroupBox>
+
+        <DockPanel Grid.Row="3" Margin="0,10,0,0" LastChildFill="True">
+            <Button DockPanel.Dock="Right" Padding="18,5" IsCancel="True">
+                <TextBlock Text="關閉"/>
+            </Button>
+            <TextBlock x:Name="StatusText" VerticalAlignment="Center" Foreground="#444444" TextWrapping="Wrap"/>
+        </DockPanel>
+    </Grid>
+</Window>
